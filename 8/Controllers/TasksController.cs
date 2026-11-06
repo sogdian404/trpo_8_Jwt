@@ -1,4 +1,4 @@
-﻿using _8.Data;
+using _8.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using _8.Models;
@@ -16,15 +16,15 @@ namespace _8.Controllers
             _context = context;
         }
 
-        public record TaskCreateRequest(string Title, string Descrition);
-        public record TaskUpdateRequest(string Title, string Descrition, bool isCompleted);
+        public record TaskCreateRequest(string Title, string Description);
+        public record TaskUpdateRequest(string Title, string Description, bool IsCompleted);
 
 
         [HttpGet]
         public IActionResult GetTasks()
         {
             var currentLogin = User.Identity?.Name;
-            var isAdmin = User.IsInRole("Админ");
+            var isAdmin = User.IsInRole("Admin");
 
             var query = _context.Tasks.AsQueryable();
 
@@ -37,6 +37,13 @@ namespace _8.Controllers
             return Ok(tasks);
         }
 
+        [HttpGet("all")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult GetAllTasks()
+        {
+            return Ok(_context.Tasks.ToList());
+        }
+
         [HttpGet("{id}")]
         public IActionResult GetTask(int id)
         {
@@ -46,7 +53,7 @@ namespace _8.Controllers
                 return NotFound();
 
             var currLogin = User.Identity?.Name;
-            var isAdmin = User.IsInRole("Админ");
+            var isAdmin = User.IsInRole("Admin");
 
             if (task.OwnerLogin != currLogin && !isAdmin)
                 return Forbid();
@@ -61,14 +68,14 @@ namespace _8.Controllers
             var task = new Models.Task
             {
                 Title = request.Title,
-                Description = request.Descrition,
+                Description = request.Description,
                 OwnerLogin = currLogin,
                 IsCompleted = false
             };
             _context.Tasks.Add(task);
             _context.SaveChanges();
 
-            return StatusCode(201);
+            return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task);
         }
 
         [HttpPut("{id}")]
@@ -80,18 +87,18 @@ namespace _8.Controllers
                 return NotFound();
 
             var currLogin = User.Identity?.Name;
-            var isAdmin = User.IsInRole("Админ");
+            var isAdmin = User.IsInRole("Admin");
 
             if (task.OwnerLogin != currLogin && !isAdmin)
                 return Forbid();
 
             task.Title = request.Title;
-            task.Description = request.Descrition;
-            task.IsCompleted = request.isCompleted;
+            task.Description = request.Description;
+            task.IsCompleted = request.IsCompleted;
 
             _context.SaveChanges();
 
-            return Ok();
+            return Ok(task);
         }
 
         [HttpDelete("{id}")]
@@ -103,7 +110,7 @@ namespace _8.Controllers
                 return NotFound();
 
             var currentLogin = User.Identity?.Name;
-            var isAdmin = User.IsInRole("Админ");
+            var isAdmin = User.IsInRole("Admin");
 
             if (task.OwnerLogin != currentLogin && !isAdmin)
                 return Forbid();

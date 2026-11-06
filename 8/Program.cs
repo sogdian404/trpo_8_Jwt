@@ -12,16 +12,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<List<User>>();
 builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
-//добавление контекста бд
+// Р”РѕР±Р°РІР»РµРЅРёРµ РєРѕРЅС‚РµРєСЃС‚Р° Р‘Р”.
 builder.Services.AddDbContext<AppDbContext>();
-//Получение ключа из конфига
+// РџРѕР»СѓС‡РµРЅРёРµ РєР»СЋС‡Р° РёР· РєРѕРЅС„РёРіСѓСЂР°С†РёРё.
 var key = builder.Configuration["Jwt:Key"]
-    ?? throw new Exception("Не задан секретный ключ JWT");
+    ?? throw new Exception("РќРµ Р·Р°РґР°РЅ СЃРµРєСЂРµС‚РЅС‹Р№ РєР»СЋС‡ JWT");
 if (Encoding.UTF8.GetByteCount(key) < 32)
-    throw new Exception("Ключ JWT слишком короткий");
+    throw new Exception("РљР»СЋС‡ JWT СЃР»РёС€РєРѕРј РєРѕСЂРѕС‚РєРёР№");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -40,7 +38,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 });
 
 /////////////////////////////////////////////////////////////
-//функция авторизации для сваггера, для проверки работы апи
+// РќР°СЃС‚СЂРѕР№РєР° Р°РІС‚РѕСЂРёР·Р°С†РёРё Swagger РґР»СЏ РїСЂРѕРІРµСЂРєРё API.
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -50,7 +48,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Введите JWT-токен, полученный при логине."
+        Description = "Р’РІРµРґРёС‚Рµ JWT-С‚РѕРєРµРЅ, РїРѕР»СѓС‡РµРЅРЅС‹Р№ РїСЂРё Р»РѕРіРёРЅРµ."
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -84,9 +82,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
+// Temporarily disabled while the local HTTP verification server is running.
 
 app.MapControllers();
 

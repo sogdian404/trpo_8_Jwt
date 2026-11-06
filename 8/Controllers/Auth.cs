@@ -1,4 +1,4 @@
-﻿using _8.Models;
+using _8.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -28,8 +28,8 @@ namespace _8.Controllers
 
         public record AuthRequest(string Login, string Password);
 
-        [HttpPost("regiser")]
-        public IActionResult Regiser(AuthRequest request)
+        [HttpPost("register")]
+        public IActionResult Register(AuthRequest request)
         {
             if (_context.Users.Any(u => u.Login == request.Login))
                 return Conflict("Логин уже существует");
@@ -37,7 +37,7 @@ namespace _8.Controllers
             var user = new User
             {
                 Login = request.Login,
-                Role = "Пользователь"
+                Role = "User"
             };
             user.PasswordHash = _hasher.HashPassword(user, request.Password);
 
@@ -67,7 +67,7 @@ namespace _8.Controllers
                 new
                 {
                     access_token = token
-                }); ; 
+                });
         }
 
         private string GenerateJWTToken(User user)
